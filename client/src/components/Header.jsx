@@ -1,5 +1,4 @@
 import React from 'react';
-import { Cpu } from 'lucide-react';
 
 function Header({ connected }) {
   return (
@@ -8,12 +7,12 @@ function Header({ connected }) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <Cpu size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <span className="text-white text-lg font-bold">AE</span>
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Agent Economy</h1>
-              <p className="text-xs text-zinc-500">Powered by Circle</p>
+              <p className="text-xs text-zinc-500">Built on Arc • Powered by Circle</p>
             </div>
           </div>
 
@@ -32,13 +31,13 @@ function Header({ connected }) {
 
           {/* Status */}
           <div className="flex items-center gap-3">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium ${
               connected 
-                ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
-                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
             }`}>
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
-              {connected ? 'Live' : 'Offline'}
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-500'}`} />
+              {connected ? 'Connected' : 'Offline'}
             </div>
           </div>
         </div>
