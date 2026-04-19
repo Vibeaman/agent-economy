@@ -249,14 +249,34 @@ class AgentManager {
   }
 
   /**
-   * Process payment between agents
+   * Process payment between agents using Circle Nanopayments
+   * 
+   * Why this works without gas:
+   * - Circle Nanopayments use EIP-3009 signed authorizations
+   * - Payments happen in Gateway layer (instant)
+   * - Batched settlement to Arc blockchain
+   * - Perfect for sub-cent agent-to-agent payments
    */
   async processPayment(from, to, amount, task) {
-    // In production, this would call Circle Nanopayments API
-    // For demo, we simulate the transaction
-    
+    // Use PaymentService for nanopayment
+    const paymentResult = await this.paymentService.createNanopayment(
+      from.id,
+      to.id,
+      amount,
+      {
+        taskId: task.id,
+        taskType: task.type,
+        taskDescription: task.description
+      }
+    );
+
+    if (!paymentResult.success) {
+      console.error('Payment failed:', paymentResult.error);
+      return null;
+    }
+
     const transaction = {
-      id: `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: paymentResult.payment.id,
       from: from.id,
       fromName: from.name,
       to: to.id,
@@ -266,10 +286,14 @@ class AgentManager {
       taskId: task.id,
       taskType: task.type,
       timestamp: Date.now(),
-      status: 'completed'
+      status: 'completed',
+      // Nanopayment specific
+      protocol: 'x402',
+      gasless: true,
+      chain: 'arc'
     };
 
-    // Update balances
+    // Update agent balances
     from.makePayment(amount);
     to.receivePayment(amount);
 
@@ -280,10 +304,10 @@ class AgentManager {
     // Store transaction
     this.transactions.push(transaction);
     
-    // Emit payment event
+    // Emit payment event with nanopayment details
     this.io.emit('payment-processed', transaction);
     
-    console.log(`💸 ${from.name} paid ${to.name} ${amount.toFixed(6)} USDC for ${task.type}`);
+    console.log(`💸 Nanopayment: ${from.name} → ${to.name}: $${amount.toFixed(6)} USDC (gasless, x402)`);
     
     return transaction;
   }
