@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Square, Zap, Users, DollarSign, Activity, ArrowRight } from 'lucide-react';
-import AgentCard from './components/AgentCard';
-import TransactionFeed from './components/TransactionFeed';
-import StatsPanel from './components/StatsPanel';
-import NegotiationPanel from './components/NegotiationPanel';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import StatsBar from './components/StatsBar';
+import AgentsSection from './components/AgentsSection';
+import LiveActivity from './components/LiveActivity';
+import HowItWorks from './components/HowItWorks';
+import Footer from './components/Footer';
 
 const SOCKET_URL = import.meta.env.PROD 
   ? 'https://agent-economy-production-1e8c.up.railway.app' 
@@ -50,16 +52,16 @@ function App() {
 
     newSocket.on('economy-started', () => {
       setIsRunning(true);
-      addNotification('🚀 Economy started!', 'success');
+      addNotification('Economy started!', 'success');
     });
 
     newSocket.on('economy-stopped', () => {
       setIsRunning(false);
-      addNotification('🛑 Economy stopped', 'info');
+      addNotification('Economy paused', 'info');
     });
 
     newSocket.on('task-created', (task) => {
-      addNotification(`📋 New task: ${task.description}`, 'info');
+      // Silent - shows in activity feed
     });
 
     newSocket.on('negotiation-started', ({ taskId, task }) => {
@@ -78,12 +80,11 @@ function App() {
         if (!prev || prev.taskId !== taskId) return prev;
         return { ...prev, winner: winningBid };
       });
-      addNotification(`✅ ${winningBid.agentName} won with $${winningBid.price.toFixed(4)}`, 'success');
     });
 
     newSocket.on('payment-processed', (tx) => {
-      addNotification(`💸 ${tx.fromName} → ${tx.toName}: $${tx.amount.toFixed(4)} USDC`, 'payment');
-      setTimeout(() => setCurrentNegotiation(null), 1000);
+      addNotification(`${tx.fromName} paid ${tx.toName} $${tx.amount.toFixed(4)}`, 'payment');
+      setTimeout(() => setCurrentNegotiation(null), 1500);
     });
 
     setSocket(newSocket);
@@ -108,119 +109,56 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-arc-blue via-arc-purple to-usdc-blue bg-clip-text text-transparent">
-              Agent Economy
-            </h1>
-            <p className="text-gray-400 mt-1">
-              AI Micro-Economy with Real-Time Nanopayments
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {/* Connection status */}
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
-              connected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-400' : 'bg-red-400'}`} />
-              {connected ? 'Connected' : 'Disconnected'}
-            </div>
-            
-            {/* Start/Stop button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={toggleEconomy}
-              disabled={!connected}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                isRunning 
-                  ? 'bg-red-500 hover:bg-red-600' 
-                  : 'bg-gradient-to-r from-arc-blue to-arc-purple hover:opacity-90'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {isRunning ? (
-                <>
-                  <Square size={20} /> Stop Economy
-                </>
-              ) : (
-                <>
-                  <Play size={20} /> Start Economy
-                </>
-              )}
-            </motion.button>
-          </div>
-        </div>
-      </header>
-
-      {/* Stats Bar */}
-      <StatsPanel stats={stats} />
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {/* Agents Column */}
-        <div className="lg:col-span-2">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <Users size={20} className="text-arc-purple" />
-            Agents
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {agents.map(agent => (
-              <AgentCard key={agent.id} agent={agent} />
-            ))}
-          </div>
-        </div>
-
-        {/* Right Column - Negotiations & Transactions */}
-        <div className="space-y-6">
-          {/* Active Negotiation */}
-          <NegotiationPanel negotiation={currentNegotiation} />
-          
-          {/* Transaction Feed */}
-          <TransactionFeed transactions={stats.recentTransactions} />
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#0a0a0a]">
+      <Header connected={connected} />
+      
+      <main>
+        <Hero 
+          isRunning={isRunning} 
+          onToggle={toggleEconomy} 
+          connected={connected}
+          stats={stats}
+        />
+        
+        <StatsBar stats={stats} />
+        
+        <AgentsSection 
+          agents={agents} 
+          currentNegotiation={currentNegotiation}
+        />
+        
+        <LiveActivity 
+          transactions={stats.recentTransactions}
+          negotiation={currentNegotiation}
+        />
+        
+        <HowItWorks />
+        
+        <Footer />
+      </main>
 
       {/* Notifications */}
-      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+      <div className="fixed bottom-6 right-6 space-y-2 z-50">
         <AnimatePresence>
           {notifications.map(notification => (
             <motion.div
               key={notification.id}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              className={`px-4 py-2 rounded-lg shadow-lg ${
-                notification.type === 'success' ? 'bg-green-500/90' :
-                notification.type === 'payment' ? 'bg-arc-purple/90' :
-                notification.type === 'error' ? 'bg-red-500/90' :
-                'bg-gray-700/90'
+              initial={{ opacity: 0, x: 100, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 100, scale: 0.8 }}
+              className={`px-4 py-3 rounded-xl backdrop-blur-sm border ${
+                notification.type === 'success' 
+                  ? 'bg-green-500/20 border-green-500/30 text-green-400' 
+                  : notification.type === 'payment' 
+                  ? 'bg-purple-500/20 border-purple-500/30 text-purple-400' 
+                  : 'bg-zinc-800/80 border-zinc-700 text-zinc-300'
               }`}
             >
-              {notification.message}
+              <span className="text-sm font-medium">{notification.message}</span>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
-
-      {/* Footer */}
-      <footer className="mt-12 text-center text-gray-500 text-sm">
-        <p>Built with Circle Nanopayments on Arc • Hackathon 2026</p>
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <span className="flex items-center gap-1">
-            <Zap size={14} /> Sub-cent transactions
-          </span>
-          <span className="flex items-center gap-1">
-            <Activity size={14} /> Real-time settlement
-          </span>
-          <span className="flex items-center gap-1">
-            <DollarSign size={14} /> USDC native
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }
