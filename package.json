@@ -22,6 +22,8 @@
   "license": "MIT",
   "dependencies": {
     "@circle-fin/x402-batching": "^2.1.0",
+    "@x402/core": "^2.10.0",
+    "@x402/evm": "^2.10.0",
     "axios": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -32,5 +34,6 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "type": "module"
 }

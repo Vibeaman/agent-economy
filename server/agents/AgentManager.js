@@ -3,7 +3,7 @@
  * Orchestrates the entire agent economy
  */
 
-const Agent = require('./Agent');
+import Agent from './Agent.js';
 
 class AgentManager {
   constructor(io, paymentService) {
@@ -313,4 +313,4 @@ class AgentManager {
   }
 }
 
-module.exports = AgentManager;
+export default AgentManager;
