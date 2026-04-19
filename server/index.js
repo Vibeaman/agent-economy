@@ -24,7 +24,11 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize services
-const paymentService = new PaymentService(process.env.CIRCLE_API_KEY);
+const paymentService = new PaymentService(
+  process.env.CIRCLE_API_KEY,
+  process.env.WALLET_PRIVATE_KEY
+);
+paymentService.initialize();
 const agentManager = new AgentManager(io, paymentService);
 
 // API Routes
