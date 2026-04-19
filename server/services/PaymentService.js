@@ -347,8 +347,8 @@ class PaymentService {
       // Execute payment (nanopayment or direct)
       let paymentResult = null;
       
-      // Every 3rd payment, do an actual payment (to demonstrate the tech)
-      if (this.stats.paymentsCount % 3 === 0 && this.account) {
+      // Every payment goes onchain for verifiable demo
+      if (this.account) {
         paymentResult = await this.executePayment(
           this.account.address, // self-transfer for demo
           amount,
