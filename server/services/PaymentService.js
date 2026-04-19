@@ -263,10 +263,11 @@ class PaymentService {
   }
 
   /**
-   * Execute payment via Circle Nanopayments (gasless) or direct transfer
+   * Execute payment - direct onchain USDC transfer for verifiable demo
+   * Also creates EIP-3009 authorization for x402 protocol compliance
    */
   async executePayment(toAddress, amount, metadata = {}) {
-    // Try nanopayment first (gasless via Gateway)
+    // Create EIP-3009 authorization (for protocol compliance)
     if (this.gatewayClient) {
       try {
         const auth = await this.createEIP3009Authorization(toAddress, amount);
@@ -278,21 +279,13 @@ class PaymentService {
             timestamp: Date.now(),
             metadata
           });
-          
-          console.log(`⚡ Nanopayment signed: ${amount} USDC (gasless)`);
-          return {
-            success: true,
-            type: 'nanopayment',
-            authorization: auth,
-            gasless: true
-          };
         }
       } catch (e) {
-        console.log('Nanopayment failed, falling back to direct:', e.message);
+        // Auth signing optional, continue to onchain transfer
       }
     }
 
-    // Fallback: direct onchain transfer
+    // Direct onchain transfer (for verifiable hackathon demo)
     if (this.walletClient) {
       try {
         const amountInUnits = parseUnits(amount.toFixed(6), USDC_DECIMALS);
