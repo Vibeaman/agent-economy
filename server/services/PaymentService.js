@@ -29,8 +29,8 @@ const arcTestnet = {
   }
 };
 
-// USDC contract on Arc Testnet
-const USDC_ADDRESS = '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359';
+// USDC contract on Arc Testnet (native USDC ERC-20 interface)
+const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
 const USDC_DECIMALS = 6;
 
 // Circle Gateway endpoints
@@ -40,10 +40,10 @@ const GATEWAY_API_MAINNET = 'https://gateway-api.circle.com';
 // CAIP-2 network identifier for Arc Testnet
 const ARC_TESTNET_CAIP2 = 'eip155:5042002';
 
-// EIP-3009 Domain for USDC
+// EIP-3009 Domain for USDC on Arc
 const EIP3009_DOMAIN = {
-  name: 'USD Coin',
-  version: '2',
+  name: 'USDC',
+  version: '1',
   chainId: 5042002,
   verifyingContract: USDC_ADDRESS
 };
