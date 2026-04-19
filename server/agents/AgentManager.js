@@ -122,10 +122,10 @@ class AgentManager {
     this.stats.economyStartTime = Date.now();
     this.io.emit('economy-started');
     
-    // Run economy loop
+    // Run economy loop - slower pace so viewers can follow the action
     this.economyInterval = setInterval(() => {
       this.runEconomyCycle();
-    }, 2000); // New task every 2 seconds
+    }, 8000); // New task every 8 seconds
     
     console.log('🏛️ Economy started');
   }
@@ -171,11 +171,14 @@ class AgentManager {
       const bid = agent.generateBid(task);
       bids.push(bid);
       
-      // Emit each bid with slight delay for visual effect
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Emit each bid with delay so viewers can see each one
+      await new Promise(resolve => setTimeout(resolve, 1200));
       this.io.emit('bid-received', { taskId: task.id, bid });
       this.io.emit('agents', this.getAgents());
     }
+
+    // Pause before announcing winner
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Select winner (lowest bid)
     const winningBid = bids.reduce((min, bid) => 
@@ -186,6 +189,9 @@ class AgentManager {
     
     // Reset bidding agents
     eligibleAgents.forEach(a => a.status = 'idle');
+    
+    // Pause before work starts
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Winner does the work
     const winner = this.agents.get(winningBid.agentId);
