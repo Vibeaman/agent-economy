@@ -8,7 +8,7 @@ import StatsPanel from './components/StatsPanel';
 import NegotiationPanel from './components/NegotiationPanel';
 
 const SOCKET_URL = import.meta.env.PROD 
-  ? 'https://agent-economy-api.onrender.com' 
+  ? 'https://agent-economy-production-1e8c.up.railway.app' 
   : 'http://localhost:3001';
 
 function App() {
